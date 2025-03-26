@@ -170,36 +170,7 @@ createFolder('/public/FieldBus/ProfinetIO')
 local function setEtherNetIPConfig()
   --TODO Check following content...
   --print("Set mode = " .. fieldbus_Model.parameters.etherNetIP.addressingMode)
-  local suc = false
-
-  suc = FieldBus.Config.EtherNetIP.setAddressingMode(fieldbus_Model.parameters.etherNetIP.addressingMode)
-  --print("Suc = " .. tostring(suc))
-
-  if fieldbus_Model.parameters.etherNetIP.addressingMode == 'STATIC' then
-    --print(fieldbus_Model.parameters.etherNetIP.ipAddress)
-    --print(fieldbus_Model.parameters.etherNetIP.netmask)
-    suc = FieldBus.Config.EtherNetIP.setInterfaceConfig(fieldbus_Model.parameters.etherNetIP.ipAddress, fieldbus_Model.parameters.etherNetIP.netmask)--, fieldbus_Model.parameters.etherNetIP.gateway, fieldbus_Model.parameters.etherNetIP.nameServer, fieldbus_Model.parameters.etherNetIP.nameServer2, fieldbus_Model.parameters.etherNetIP.domainName)
-    --print("Setting of static IP setup = " .. tostring(suc))
-  end
-
-  --[[if suc then
-    if fieldbus_Model.parameters.etherNetIP.addressingMode == 'STATIC' then
-      suc = FieldBus.Config.EtherNetIP.setInterfaceConfig(fieldbus_Model.parameters.etherNetIP.ipAddress, fieldbus_Model.parameters.etherNetIP.netmask, fieldbus_Model.parameters.etherNetIP.gateway, fieldbus_Model.parameters.etherNetIP.nameServer, fieldbus_Model.parameters.etherNetIP.nameServer2, fieldbus_Model.parameters.etherNetIP.domainName)
-      print("Setting of static IP setup = " .. tostring(suc))
-    end
-  ]]
-  --end
-  CSK_Fieldbus.pageCalled()
-end
-fieldbus_Model.setEtherNetIPConfig = setEtherNetIPConfig
-
--- Function to react on received EtherNet/IP addressing mode
----@param addressingMode FieldBus.Config.EtherNetIP.AddressingMode Addressing mode for the ip parameters.
-local function handleOnAddressingModeChanged(addressingMode)
-  _G.logger:fine("New EtherNet/IP AdressingMode = " .. tostring(addressingMode))
-  fieldbus_Model.parameters.etherNetIP.addressingMode = addressingMode
-
-  --setEtherNetIPConfig() --TODO chech logic
+  FieldBus.Config.EtherNetIP.setAddressingMode(fieldbus_Model.parameters.etherNetIP.addressingMode)
 end
 
 -- Function to react on received EtherNet/IP interface config.
@@ -210,13 +181,7 @@ end
 ---@param nameServer2? string Secondary name server.
 ---@param domainName? string Default domain name.
 local function handleOnEthernetIPInterfaceConfigChanged(ipAddress, netmask, gateway, nameServer, nameServer2, domainName)
-  _G.logger:fine("New EtherNet/IP interface config:")
-  _G.logger:fine("IP Address / NetMask = " .. tostring(ipAddress) .. ' / ' .. tostring(netmask))
-  _G.logger:fine("Gateway = " .. tostring(gateway))
-  _G.logger:fine("Nameserver 1 / 2 = " .. tostring(nameServer) .. ' / ' .. tostring(nameServer2))
-  _G.logger:fine("DomainName = " .. tostring(domainName))
-
-  --TODO check logic
+ --TODO check logic
   --[[
   fieldbus_Model.parameters.etherNetIP.addressingMode
   fieldbus_Model.parameters.etherNetIP.ipAddress
@@ -227,7 +192,6 @@ local function handleOnEthernetIPInterfaceConfigChanged(ipAddress, netmask, gate
   fieldbus_Model.parameters.etherNetIP.domainName
   setEtherNetIPConfig()
   ]]
-
 end
 
 local function getEtherNetIPConfig()
@@ -248,9 +212,9 @@ local function getEtherNetIPConfig()
 
   CSK_Fieldbus.pageCalled()
 
---  _G.logger:fine("AddressingMode = " .. tostring(etherNetIPAddressingMode))
---  _G.logger:fine("InterfaceConfig = " .. tostring(etherNetIPInterfaceConfig))
---  _G.logger:fine("MAC Address = " .. tostring(etherNetIPMACAddress))
+  _G.logger:fine("AddressingMode = " .. tostring(etherNetIPAddressingMode))
+  _G.logger:fine("InterfaceConfig = " .. tostring(etherNetIPInterfaceConfig))
+  _G.logger:fine("MAC Address = " .. tostring(etherNetIPMACAddress))
 
 end
 fieldbus_Model.getEtherNetIPConfig = getEtherNetIPConfig
@@ -262,39 +226,10 @@ local function handleOnEtherNetIPFieldbusStorageRequest(storageHandle)
   _G.logger:fine('StorageRequest operation = ' .. tostring(operation))
   if operation == 'LOAD' then
 
-    -- Check if file exists
-    local dataFile = File.open(fieldbus_Model.parameters.etherNetIP.storageRequestDataPath, 'rb')
-    local setSuc = false
-
-    if dataFile then
-      local data = File.read(dataFile)
-      File.close(dataFile)
-      setSuc = FieldBus.StorageRequest.setData(storageHandle, data)
-      _G.logger:fine("Setting data = " .. tostring(setSuc))
-      getEtherNetIPConfig()
-    else
-      _G.logger:info("Not able to LOAD data.")
-    end
-
-    if setSuc then
-      FieldBus.StorageRequest.notifyResult(storageHandle, true)
-    else
-      FieldBus.StorageRequest.notifyResult(storageHandle, false)
-    end
 
   elseif operation == 'SAVE' then
-    local data = FieldBus.StorageRequest.getData(storageHandle)
-    local dataFile = File.open(fieldbus_Model.parameters.etherNetIP.storageRequestDataPath, 'wb')
-    local suc = File.write(dataFile, data)
-    File.close(dataFile)
-    _G.logger:fine("Result to write SR = " .. tostring(suc))
-
-    if suc then
-      FieldBus.StorageRequest.notifyResult(storageHandle, true)
-    else
-      FieldBus.StorageRequest.notifyResult(storageHandle, false)
-    end
-    CSK_Fieldbus.pageCalled()
+  end
+  CSK_Fieldbus.pageCalled()
   end
 end
 
